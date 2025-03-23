@@ -1,5 +1,8 @@
 <template>
-  <div class="mx-auto max-w-screen-xl mx-auto p-2">
+  <div v-if="!accessToken" class="flex justify-center">
+    <h3 class="font-semibold my-5">Please Log In First.</h3>
+  </div>
+  <div v-else class="mx-auto max-w-screen-xl mx-auto p-2">
     <h2 class="text-2xl font-bold mb-4">Wishlist</h2>
     <div
       class="flex justify-center items-center min-h-[50vh]"
@@ -61,6 +64,8 @@
 <script setup>
 import { storeToRefs } from "pinia";
 import { useProductStore } from "../store/products";
+
+const accessToken = useCookie("accessToken");
 
 const productStore = useProductStore();
 const { wishlist, wishlistList } = storeToRefs(productStore);
