@@ -1,7 +1,39 @@
 <template>
   <div
-    class="max-w-screen-xl mx-auto flex flex-col items-center justify-center min-h-screen bg-gray-100"
+    class="relative max-w-screen-xl mx-auto flex flex-col items-center justify-center min-h-screen bg-gray-100"
   >
+    <div
+      v-if="LgSuccess"
+      class="absolute top-[300px] left-[45%] bg-white w-[fit-content] p-4 rounded-lg shadow-lg border border-black"
+    >
+      <p class="text-sm text-black mb-3">Log in Success! Go to Home Page.</p>
+
+      <div class="flex items-center justify-center">
+        <button
+          @click="closeLgSuccess"
+          class="text-sm w-[fit-content] px-4 bg-black hover:bg-white hover:text-black border hover:border-black text-white py-2 rounded"
+        >
+          Ok
+        </button>
+      </div>
+    </div>
+    <div
+      v-if="RgSuccess"
+      class="absolute top-[300px] left-[45%] bg-white w-[fit-content] p-4 rounded-lg shadow-lg border border-black"
+    >
+      <p class="text-sm text-black mb-3">
+        Registeraion Success! Please Log In.
+      </p>
+
+      <div class="flex items-center justify-center">
+        <button
+          @click="closeRgSuccess"
+          class="text-sm w-[fit-content] px-4 bg-black hover:bg-white hover:text-black border hover:border-black text-white py-2 rounded"
+        >
+          Ok
+        </button>
+      </div>
+    </div>
     <h1 class="text-3xl font-bold mb-4">MY ACCOUNT</h1>
     <nav class="text-sm text-gray-500 mb-6">
       <NuxtLink :to="`/`">HOME</NuxtLink> •
@@ -53,7 +85,7 @@
           <span
             v-if="
               (!isPasswordValid(loginPassword) && isLgSubmitted) ||
-              (loginPassword && isLgSubmitted)
+              (!loginPassword && isLgSubmitted)
             "
             class="text-red-500 text-sm"
           >
@@ -194,6 +226,16 @@ const showRgPassword = ref(false);
 const showLgPassword = ref(false);
 const isRgSubmitted = ref(false);
 const isLgSubmitted = ref(false);
+const RgSuccess = ref(false);
+const LgSuccess = ref(false);
+
+const closeRgSuccess = () => {
+  RgSuccess.value = false;
+};
+const closeLgSuccess = () => {
+  LgSuccess.value = false;
+  fetchUserPf();
+};
 
 const isEmailValid = () => {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -232,7 +274,7 @@ const handleRegister = async () => {
         avatar: "https://api.lorem.space/image/face?w=640&h=480",
       }),
     });
-    alert("Registration successful! Please Log in Now.");
+    RgSuccess.value = true;
   } catch (error) {
     console.error("Registration failed:", error);
     alert("Registration failed. Please try again.");
@@ -280,19 +322,20 @@ const handleLogin = async () => {
         password: loginPassword.value,
       }),
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Login failed");
+    }
     const data = await response.json();
 
-    const expiresIn = 180;
+    const expiresIn = 10 * 60 * 60;
     const expiryTime = Date.now() + expiresIn * 1000;
     accessToken.value = data.access_token;
     refreshToken.value = data.refresh_token;
 
-    console.log("accessToken", accessToken.value);
-    console.log("accrefreshTokenessToken", refreshToken.value);
-
     accessTokenExpiry.value = expiryTime;
-    fetchUserPf();
-    alert("Login successful!");
+    LgSuccess.value = true;
   } catch (error) {
     console.error("Login failed:", error.response?.data || error.message);
     alert("Login failed. Please try again.");

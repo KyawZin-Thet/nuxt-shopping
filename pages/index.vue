@@ -15,9 +15,6 @@
           <span class="font-semibold">Email:</span> {{ profile.email }}
         </p>
       </div>
-      <div v-else>
-        <p class="text-gray-700">No profile data found.</p>
-      </div>
     </div>
   </div>
 </template>
@@ -26,13 +23,30 @@
 import { useProductStore } from "../store/products";
 
 const accessToken = useCookie("accessToken");
-// Adjust the path to your store
-
-// Access the store
 const productStore = useProductStore();
 
-// Access the profile data using the getter
-const profile = productStore.profilegetter;
+const profile = ref(null);
+
+const fetchUserPf = async () => {
+  try {
+    if (!accessToken.value) {
+      return;
+    }
+    const response = await $fetch(
+      "https://api.escuelajs.co/api/v1/auth/profile",
+      {
+        headers: { Authorization: `Bearer ${accessToken.value}` },
+      }
+    );
+    productStore.setProfile(response);
+    profile.value = productStore.profilegetter;
+    return response;
+  } catch (error) {
+    console.error("Failed to get profile:", error);
+  }
+};
+
+onMounted(fetchUserPf);
 </script>
 
 <style scoped></style>
