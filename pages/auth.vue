@@ -207,12 +207,8 @@ import { useProductStore } from "../store/products";
 
 const router = useRouter();
 
-//const accesstoken = ref(null);
 const accessToken = useCookie("accessToken");
 const refreshToken = useCookie("refreshToken");
-
-console.log("accessToken", accessToken.value);
-console.log("accrefreshTokenessToken", refreshToken.value);
 
 const accessTokenExpiry = useCookie("accessTokenExpiry");
 
@@ -282,9 +278,7 @@ const handleRegister = async () => {
 };
 const fetchUserPf = async () => {
   try {
-    // const token = await getValidAccessToken();
     if (!accessToken.value) {
-      console.log("No valid token, logging out.");
       return;
     }
     const response = await $fetch(
@@ -344,7 +338,3 @@ const handleLogin = async () => {
 </script>
 
 <style scoped></style>
-<!-- "name": "Nicolas",
-	"email": "nico@gmail.com",
-	"password": "12345678",
-    "avatar": "https://api.lorem.space/image/face?w=640&h=480" -->

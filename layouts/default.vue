@@ -86,9 +86,8 @@
 
 <script setup>
 import { ref } from "vue";
-import { useAuth } from "../composables/useAuth";
 const router = useRouter();
-const { getValidAccessToken } = useAuth();
+
 const accessToken = useCookie("accessToken");
 const refreshToken = useCookie("refreshToken");
 const accessTokenExpiry = useCookie("accessTokenExpiry");
@@ -129,7 +128,7 @@ const refreshAccessToken = async () => {
       "https://api.escuelajs.co/api/v1/auth/refresh-token",
       {
         method: "POST",
-        body: { refreshToken: "kldfgh" },
+        body: { refreshToken: refreshToken.value },
       }
     );
     if (!response.access_token) {
@@ -139,7 +138,6 @@ const refreshAccessToken = async () => {
     accessToken.value = response.access_token;
     const expiresIn = 10 * 60 * 60;
     accessTokenExpiry.value = Date.now() + expiresIn * 1000;
-    console.log("Access token refreshed!", accessTokenExpiry.value);
   } catch (error) {
     console.error("Failed to refresh token:", error);
     if (
@@ -151,17 +149,6 @@ const refreshAccessToken = async () => {
   }
 };
 
-// const getValidAccessToken = async () => {
-//   if (!accessToken.value || Date.now() > accessTokenExpiry.value) {
-//     console.log("Access token expired! Refreshing...");
-//     await refreshAccessToken();
-//   }
-//   return accessToken.value;
-// };
-
-console.log("Date.now", Date.now());
-console.log("accessTokenExpiry.value", accessTokenExpiry.value);
-
 let intervalId;
 
 onMounted(() => {
@@ -169,8 +156,7 @@ onMounted(() => {
     if (accessTokenExpiry.value && Date.now() > accessTokenExpiry.value) {
       await refreshAccessToken();
     }
-    console.log("checked", accessTokenExpiry.value, Date.now());
-  }, 60000); // Check every minute
+  }, 3600000);
 });
 
 onUnmounted(() => {
